@@ -75,6 +75,9 @@ class Blockchain {
             block.hash = SHA256(JSON.stringify(block)).toString(); // Push the block into the chain array and update height
             self.chain.push(block);
             resolve(block);
+            self.validateChain().then(errorLog => {
+                console.log(`Chain validation results: ${errorLog}`);
+            });
         })
     }
 
@@ -121,7 +124,8 @@ class Blockchain {
             let block = new BlockClass.Block({ star });
             block.owner = address;
             block = await self._addBlock(block)
-            resolve(block);             
+            resolve(block);         
+
         });
     }
 
@@ -177,6 +181,7 @@ class Blockchain {
             stars = ownedBlocks.map(block => JSON.parse(hex2ascii(block.body)));
             stars ? resolve(stars) : reject(new Error('Failed to return stars.'));
         });
+        
     }
 
     /**
