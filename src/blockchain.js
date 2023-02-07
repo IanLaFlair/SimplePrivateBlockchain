@@ -169,16 +169,14 @@ class Blockchain {
     getStarsByWalletAddress (address) {
         let self = this;
         let stars = [];
-        return new Promise((resolve, reject) => {
-            self.chain.forEach(block => {
-                block.getBData().then(starData => {
-                    if(starData.owner === address) {
-                        stars.push(starData);
-                    }
-                });
-            });
-            resolve(stars);
-    });
+        // validate chain
+        this.validateChain().then(errors => typeof errors === 'string' ?  console.log('[SUCCESS] ', errors) : errors.forEach(error => console.log('[ERROR] ', error)));
+        return new Promise(async (resolve, reject) => {
+            let ownedBlocks = self.chain.filter(block => block.owner === address);
+            if (ownedBlocks.length === 0) reject(new Error('Address not found.'));
+            stars = ownedBlocks.map(block => JSON.parse(hex2ascii(block.body)));
+            stars ? resolve(stars) : reject(new Error('Failed to return stars.'));
+        });
     }
 
     /**
